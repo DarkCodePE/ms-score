@@ -10,13 +10,17 @@ class ScoringService:
 
     def _extract_score_from_text(self, relevance_text: str) -> int:
         """Extrae el valor numérico de la puntuación del texto de relevancia."""
+        import re
         try:
-            # Busca el patrón "X/5" y extrae el número
-            score_text = relevance_text.split("Puntuación de idoneidad:")[1].strip()
-            numeric_score = int(score_text.split('/')[0])
-            return numeric_score
-        except Exception:
-            # Si hay algún error en el parsing, retorna un valor por defecto
+            # Buscar cualquier puntuación numérica en el formato "<número>/5" o precedida por "Puntuación:"
+            match = re.search(r'Puntuación:\s*(\d+)|(\d+)/5', relevance_text)
+            if match:
+                # Extraer el grupo correspondiente al número encontrado
+                return int(match.group(1) or match.group(2))
+            return 0  # Si no encuentra coincidencias
+        except Exception as e:
+            # Manejar errores inesperados
+            print(f"Error al extraer la puntuación: {e}")
             return 0
 
     def evaluate_cv(self,
@@ -40,7 +44,7 @@ class ScoringService:
                 user_id=user_id,
                 job_offer_id=job_offer_id,
                 score=numeric_score,  # Ahora usando el valor numérico extraído
-                reasoning=result.summary
+                reasoning=result.reasoning
             )
 
             # Usar la sesión proporcionada

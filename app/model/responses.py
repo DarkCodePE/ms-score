@@ -7,3 +7,4 @@ class CVResponse(BaseModel):
     role: str
     summary: str
     relevance: str
+    reasoning: str
